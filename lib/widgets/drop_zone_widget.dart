@@ -27,18 +27,19 @@ class DropZoneWidget extends StatelessWidget {
       top: zone.position.dy - (zone.size / 2),
       child: DragTarget<String>(
         builder: (context, candidateData, rejectedData) {
-          // Determine if there's a valid candidate being dragged over
           final bool hasValidCandidate = candidateData.isNotEmpty;
+          final bool hasInvalidCandidate = rejectedData.isNotEmpty;
           
-          return _buildZoneShape(
+          return _buildZoneContent(
             isHighlighted: zone.isHighlighted || hasValidCandidate,
             isOccupied: zone.occupiedBy != null,
+            isInvalid: hasInvalidCandidate,
           );
         },
         onWillAccept: (data) {
           if (data != null) {
             onDragEnter(zone.id);
-            return true; // Allow any item to be dragged over
+            return true;
           }
           return false;
         },
@@ -46,80 +47,76 @@ class DropZoneWidget extends StatelessWidget {
           onDragExit(zone.id);
         },
         onAccept: (itemId) {
-          AudioManager().playCorrectDrop();
-          HapticFeedbackManager().correctDrop();
           onItemDropped(itemId, zone.id);
         },
       ),
     );
   }
   
-  Widget _buildZoneShape({
+  Widget _buildZoneContent({
     required bool isHighlighted,
     required bool isOccupied,
+    required bool isInvalid,
   }) {
     Color zoneColor = zone.color;
     
-    if (isHighlighted) {
+    if (isInvalid) {
+      zoneColor = Colors.red.withOpacity(0.3);
+    } else if (isHighlighted) {
       zoneColor = zone.color.withOpacity(0.8);
     } else if (isOccupied) {
       zoneColor = zone.color.withOpacity(0.2);
     }
     
-    Widget shape;
-    
-    switch (zone.acceptedType) {
-      case ItemType.circle:
-        shape = Container(
-          width: zone.size,
-          height: zone.size,
-          decoration: BoxDecoration(
-            color: Colors.transparent,
-            shape: BoxShape.circle,
-            border: Border.all(
+    return Container(
+      width: zone.size,
+      height: zone.size,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: zoneColor,
+          width: 3.0,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: zoneColor.withOpacity(0.2),
+            blurRadius: 8,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8),
+          child: Text(
+            zone.label ?? '',
+            style: TextStyle(
               color: zoneColor,
-              width: 3.0,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
             ),
+            textAlign: TextAlign.center,
           ),
-        );
-        break;
-      case ItemType.square:
-        shape = Container(
-          width: zone.size,
-          height: zone.size,
-          decoration: BoxDecoration(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(8.0),
-            border: Border.all(
-              color: zoneColor,
-              width: 3.0,
-            ),
-          ),
-        );
-        break;
-      case ItemType.triangle:
-        shape = CustomPaint(
-          size: Size(zone.size, zone.size),
-          painter: TriangleOutlinePainter(
-            color: zoneColor,
-          ),
-        );
-        break;
-      case ItemType.star:
-        shape = CustomPaint(
-          size: Size(zone.size, zone.size),
-          painter: StarOutlinePainter(
-            color: zoneColor,
-          ),
-        );
-        break;
-    }
-    
-    // Apply animations and effects
-    return shape
-      .animate(target: isHighlighted ? 1 : 0)
-      .scale(begin: Offset(1.0, 1.0), end: Offset(1.05, 1.05), duration: 200.ms)
-      .shimmer(duration: 1000.ms, color: Colors.white.withOpacity(0.3));
+        ),
+      ),
+    )
+    .animate(target: isHighlighted ? 1 : 0)
+    .scale(
+      begin: Offset(1.0, 1.0),
+      end: Offset(1.05, 1.05),
+      duration: 200.ms,
+    )
+    .shimmer(
+      duration: 1000.ms,
+      color: Colors.white.withOpacity(0.3),
+    )
+    .animate(target: isInvalid ? 1 : 0)
+    .shake(
+      duration: 500.ms,
+      hz: 4,
+      curve: Curves.easeInOut,
+    );
   }
 }
 

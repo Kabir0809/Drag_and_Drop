@@ -26,8 +26,8 @@ class DragItemWidget extends StatelessWidget {
       top: item.position.dy - (item.size / 2),
       child: Draggable<String>(
         data: item.id,
-        feedback: _buildItemShape(opacity: 0.8, elevation: 8.0),
-        childWhenDragging: _buildItemShape(opacity: 0.3),
+        feedback: _buildItemContent(opacity: 0.8, elevation: 8.0),
+        childWhenDragging: _buildItemContent(opacity: 0.3),
         onDragStarted: () {
           AudioManager().playDragStart();
           HapticFeedbackManager().dragStart();
@@ -40,63 +40,54 @@ class DragItemWidget extends StatelessWidget {
         },
         onDragUpdate: (details) {
           onDragUpdate(item.id, details.localPosition);
-          },
-        child: _buildItemShape(),
+        },
+        child: _buildItemContent(),
       ),
     );
   }
   
-  Widget _buildItemShape({double opacity = 1.0, double elevation = 2.0}) {
-    Widget shape;
-    
-    switch (item.type) {
-      case ItemType.circle:
-        shape = Container(
-          width: item.size,
-          height: item.size,
-          decoration: BoxDecoration(
-            color: item.color.withOpacity(opacity),
-            shape: BoxShape.circle,
-          ),
-        );
-        break;
-      case ItemType.square:
-        shape = Container(
-          width: item.size,
-          height: item.size,
-          decoration: BoxDecoration(
-            color: item.color.withOpacity(opacity),
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-        );
-        break;
-      case ItemType.triangle:
-        shape = CustomPaint(
-          size: Size(item.size, item.size),
-          painter: TrianglePainter(
-            color: item.color.withOpacity(opacity),
-          ),
-        );
-        break;
-      case ItemType.star:
-        shape = CustomPaint(
-          size: Size(item.size, item.size),
-          painter: StarPainter(
-            color: item.color.withOpacity(opacity),
-          ),
-        );
-        break;
-    }
-    
-    // Apply animations and effects
+  Widget _buildItemContent({double opacity = 1.0, double elevation = 2.0}) {
     return Material(
       color: Colors.transparent,
       elevation: elevation,
-      shape: CircleBorder(),
-      child: shape,
+      child: Container(
+        width: item.size,
+        height: item.size,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: item.color.withOpacity(opacity),
+            width: 3.0,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 4,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(8),
+          child: Image.asset(
+            item.imagePath!,
+            fit: BoxFit.contain,
+          ),
+        ),
+      ),
     )
     .animate(target: item.isDragging ? 1 : 0)
-    .scale(begin: Offset(1.0, 1.0), end: Offset(1.1, 1.1), duration: 300.ms, curve: Curves.easeOutBack);
+    .scale(
+      begin: Offset(1.0, 1.0),
+      end: Offset(1.1, 1.1),
+      duration: 300.ms,
+      curve: Curves.easeOutBack,
+    )
+    .shimmer(
+      duration: 1000.ms,
+      color: Colors.white.withOpacity(0.3),
+    );
   }
 }
 

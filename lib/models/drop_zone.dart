@@ -10,6 +10,10 @@ class DropZone {
   final Color color;
   String? occupiedBy;
   bool isHighlighted = false;
+  String? imagePath;
+  String? label;
+  String? description;
+  bool showHint = false;
   
   DropZone({
     required this.id,
@@ -19,10 +23,16 @@ class DropZone {
     this.priority = 0,
     required this.color,
     this.occupiedBy,
+    this.imagePath,
+    this.label,
+    this.description,
+    this.showHint = false,
   });
   
   bool canAccept(DragItem item) {
-    return item.type == acceptedType && occupiedBy == null;
+    if (occupiedBy != null) return false;
+    if (item.type != acceptedType) return false;
+    return item.label == label;
   }
   
   DropZone copyWith({
@@ -34,6 +44,10 @@ class DropZone {
     Color? color,
     String? occupiedBy,
     bool? isHighlighted,
+    String? imagePath,
+    String? label,
+    String? description,
+    bool? showHint,
   }) {
     return DropZone(
       id: id ?? this.id,
@@ -43,6 +57,10 @@ class DropZone {
       priority: priority ?? this.priority,
       color: color ?? this.color,
       occupiedBy: occupiedBy ?? this.occupiedBy,
+      imagePath: imagePath ?? this.imagePath,
+      label: label ?? this.label,
+      description: description ?? this.description,
+      showHint: showHint ?? this.showHint,
     )..isHighlighted = isHighlighted ?? this.isHighlighted;
   }
 }

@@ -1,23 +1,41 @@
 import 'package:flutter/material.dart';
 
-enum ItemType { circle, square, triangle, star }
+enum ItemType {
+  animal,
+  number,
+  landmark,
+  sport,
+  vehicle,
+  furniture,
+  food,
+  instrument,
+  clothing,
+  weather,
+  shape,
+  color,
+  job,
+  season,
+  emotion,
+}
 
 class DragItem {
   final String id;
   final ItemType type;
   final Color color;
   final double size;
-  final Map<String, dynamic> properties;
   bool isDragging = false;
   Offset position;
+  String? imagePath;
+  String? label;
   
   DragItem({
     required this.id,
     required this.type,
     required this.color,
     this.size = 80.0,
-    this.properties = const {},
     this.position = Offset.zero,
+    this.imagePath,
+    this.label,
   });
   
   DragItem copyWith({
@@ -25,17 +43,19 @@ class DragItem {
     ItemType? type,
     Color? color,
     double? size,
-    Map<String, dynamic>? properties,
     bool? isDragging,
     Offset? position,
+    String? imagePath,
+    String? label,
   }) {
     return DragItem(
       id: id ?? this.id,
       type: type ?? this.type,
       color: color ?? this.color,
       size: size ?? this.size,
-      properties: properties ?? this.properties,
       position: position ?? this.position,
+      imagePath: imagePath ?? this.imagePath,
+      label: label ?? this.label,
     )..isDragging = isDragging ?? this.isDragging;
   }
 }
